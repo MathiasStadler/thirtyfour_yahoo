@@ -26,6 +26,8 @@ use url::Url;
 //path of webpage
 #[allow(dead_code)]
 const WEB_XPATH:&[&[&str]] = &[
+     //No.,FieldName,xpath
+     &["1","accept","/html/body/div/div/div/div/form/div[2]/div[2]/button[1]"],
 ];
 
 /// .
@@ -65,6 +67,24 @@ pub async fn run() -> color_eyre::Result<(),Box<dyn Error>> {
     Ok(())
 }
 
+async fn scrape_all(_driver: WebDriver) -> color_eyre::Result<(), Box<dyn Error>> {
+    // wait browser already load
+    wait_seconds_of_browser(_driver.clone(), 20).await?;
+
+    for field in 0..WEB_XPATH.len() {
+        println!("No.   => {}", WEB_XPATH[field][0]);
+        println!("Field => {}", WEB_XPATH[field][1]);
+        // println!("XPath => {}",WEB_XPATH[field][2]);
+        let elem_form: WebElement = _driver.find(By::XPath(WEB_XPATH[field][2])).await?;
+        elem_form.click().await?;
+        wait_seconds_of_browser(_driver.clone(), 5).await?;
+    }
+
+    wait_seconds_of_browser(_driver.clone(), 20).await?;
+
+    Ok(())
+}
+
 async fn screenshot_browser(_driver: WebDriver) -> color_eyre::Result<(), Box<dyn Error>> {
     //screenshot of browser windows
     // FROM HERE
@@ -85,7 +105,7 @@ async fn initialize_driver() -> Result<WebDriver, WebDriverError> {
     // let caps = DesiredCapabilities::chrome();
     
     let mut caps: thirtyfour::ChromeCapabilities = DesiredCapabilities::chrome();
-    caps.add_arg("--headless")?;
+    // caps.add_arg("--headless")?;
     caps.add_arg("--no-sandbox")?;
     caps.add_arg("--disable-dev-shm-usage")?;
     
